@@ -16,6 +16,12 @@
             margin: 0;
             overflow: hidden;
         }
+
+        .window.maximized {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -31,6 +37,19 @@
             <p style="text-align: center;">nothing to see</p>
         </div>
     </div>
+    <script>
+        const windowEl = document.querySelector('.window');
+        const closeBtn = document.querySelector('.close');
+        const resizeBtn = document.querySelector('.resize');
+
+        closeBtn.addEventListener('click', () => {
+            windowEl.style.display = 'none';
+        });
+
+        resizeBtn.addEventListener('click', () => {
+            windowEl.classList.toggle('maximized');
+        });
+    </script>
 </body>
 
 </html>
