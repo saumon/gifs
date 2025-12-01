@@ -37,10 +37,56 @@
             cursor: move;
             user-select: none;
         }
+
+        #desktop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            pointer-events: auto;
+            text-align: center;
+        }
+
+        .desktop-icon img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 5px;
+        }
+
+        .desktop-icon span {
+            background: #fff;
+            padding: 2px 4px;
+            border: 1px solid #000;
+            font-family: 'Geneva_9', sans-serif;
+            font-size: 12px;
+            box-shadow: 1px 1px 0 #000;
+        }
+
+        .window {
+            z-index: 10;
+        }
     </style>
 </head>
 
 <body>
+    <div id="desktop"></div>
     <div class="window" style="width: 300px">
         <div class="title-bar">
             <button aria-label="Close" class="close"></button>
@@ -115,6 +161,35 @@
         document.addEventListener('mouseup', () => {
             isDragging = false;
         });
+
+        // Dynamic GIF Icons
+        const desktop = document.getElementById('desktop');
+        const windowPane = document.querySelector('.window-pane');
+        const windowTitle = document.querySelector('.title-bar .title');
+
+        fetch('https://api.github.com/repos/saumon/gifs/contents/assets')
+            .then(response => response.json())
+            .then(data => {
+                if (!Array.isArray(data)) return;
+
+                data.filter(file => file.name.endsWith('.gif')).forEach(file => {
+                    const icon = document.createElement('div');
+                    icon.className = 'desktop-icon';
+                    icon.innerHTML = `
+                        <img src="icon.svg" alt="GIF">
+                        <span>${file.name}</span>
+                    `;
+
+                    icon.addEventListener('click', () => {
+                        windowPane.innerHTML = `<img src="${file.download_url}" style="max-width: 100%; display: block; margin: 0 auto;">`;
+                        windowTitle.textContent = file.name;
+                        windowEl.style.display = 'flex';
+                    });
+
+                    desktop.appendChild(icon);
+                });
+            })
+            .catch(err => console.error('Failed to load assets:', err));
     </script>
 </body>
 
