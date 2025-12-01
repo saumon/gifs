@@ -17,10 +17,25 @@
             overflow: hidden;
         }
 
+        .window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         .window.maximized {
             width: 100% !important;
             height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
             margin: 0;
+        }
+
+        .title-bar {
+            cursor: move;
+            user-select: none;
         }
     </style>
 </head>
@@ -41,6 +56,7 @@
         const windowEl = document.querySelector('.window');
         const closeBtn = document.querySelector('.close');
         const resizeBtn = document.querySelector('.resize');
+        const titleBar = document.querySelector('.title-bar');
 
         closeBtn.addEventListener('click', () => {
             windowEl.style.display = 'none';
@@ -48,6 +64,56 @@
 
         resizeBtn.addEventListener('click', () => {
             windowEl.classList.toggle('maximized');
+            // Reset position if maximizing/restoring to ensure centering works again if needed
+            if (!windowEl.classList.contains('maximized')) {
+                // Optional: could reset to center, or keep last position. 
+                // For simplicity, let's keep it where it is or reset. 
+                // If we want to reset to center when restoring:
+                // windowEl.style.top = '50%';
+                // windowEl.style.left = '50%';
+                // windowEl.style.transform = 'translate(-50%, -50%)';
+                // But user might expect it to stay where they dragged it.
+                // However, the CSS .window rule handles the centering if style attribute is cleared.
+                // Let's leave the style attribute as is for now, it handles the dragged position.
+            }
+        });
+
+        // Drag Logic
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+
+        titleBar.addEventListener('mousedown', (e) => {
+            // Prevent dragging if clicking buttons
+            if (e.target.tagName === 'BUTTON') return;
+
+            if (windowEl.classList.contains('maximized')) return;
+
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            const rect = windowEl.getBoundingClientRect();
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            // Switch to absolute pixel positioning to prevent jumping
+            windowEl.style.transform = 'none';
+            windowEl.style.left = `${initialLeft}px`;
+            windowEl.style.top = `${initialTop}px`;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+
+            windowEl.style.left = `${initialLeft + deltaX}px`;
+            windowEl.style.top = `${initialTop + deltaY}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
         });
     </script>
 </body>
